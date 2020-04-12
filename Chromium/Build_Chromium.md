@@ -32,7 +32,9 @@ vs_enterprise_2019.EXE --add Microsoft.VisualStudio.Workload.NativeDesktop  --ad
 
 
 ## 配置`depot_tools`
-下载 [depot_tools bundle](https://storage.googleapis.com/chrome-infra/depot_tools.zip) 然后解压到c盘
+下载 然后解压到c盘
+ - [2020-4-12百度云](https://pan.baidu.com/s/1JExQAMmyxCoKG3px5arUrA)
+ - [官方depot_tools bundle](https://storage.googleapis.com/chrome-infra/depot_tools.zip) 
 
 添加环境变量：
 
@@ -145,3 +147,6 @@ C:/chromium/src/>ninja -C out\Debug chrome
 [如何安装旧版本](https://chromium.googlesource.com/chromium/src.git/+/master/docs/building_old_revisions.md)
 
 [中文版说明编译68版本](https://my.oschina.net/u/3175552/blog/3001316)
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTE0NDM3ODE5MzJdfQ==
+-->
