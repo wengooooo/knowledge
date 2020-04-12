@@ -1,4 +1,5 @@
-# bian
+# 编译Chromium
+
 ## 系统要求
 
 -   至少8GB RAM的64位系统。 强烈建议超过16GB。
@@ -144,6 +145,3 @@ C:/chromium/src/>ninja -C out\Debug chrome
 [如何安装旧版本](https://chromium.googlesource.com/chromium/src.git/+/master/docs/building_old_revisions.md)
 
 [中文版说明编译68版本](https://my.oschina.net/u/3175552/blog/3001316)
-<!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwOTIyMDI4NDJdfQ==
--->
