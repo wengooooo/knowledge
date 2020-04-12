@@ -1,7 +1,6 @@
+# Xposed 方法
 
-
-
-> Written with [StackEdit](https://stackedit.io/).
+## callStatic
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNzMwOTk4MTE2XX0=
+eyJoaXN0b3J5IjpbLTM0OTg3NDUyMF19
 -->
