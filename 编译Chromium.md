@@ -1,8 +1,3 @@
----
-
-
----
-
 <h2 id="系统要求">系统要求</h2>
 <ul>
 <li>至少8GB RAM的64位系统。 强烈建议超过16GB。</li>
@@ -111,3 +106,6 @@ blink_symbol_level=0
 <p><a href="https://chromium.googlesource.com/chromium/src.git/+/master/docs/building_old_revisions.md">如何安装旧版本</a></p>
 <p><a href="https://my.oschina.net/u/3175552/blog/3001316">中文版说明编译68版本</a></p>
 
+<!--stackedit_data:
+eyJoaXN0b3J5IjpbLTM4ODEzMTA5OF19
+-->
