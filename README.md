@@ -1,4 +1,4 @@
-# 开发积累
+# 开发的一些积累
 
 ## PHP
 
@@ -7,7 +7,7 @@
 ## Laravel
 
 ## Chromium
-[enter link description here](https://github.com/wengooooo/knowledge/blob/master/Chromium/Build_Chromium.md)
+- [编译Chromium](https://github.com/wengooooo/knowledge/blob/master/Chromium/Build_Chromium.md)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE5NDY5NDg3OTAsMTczOTA2Njc5N119
+eyJoaXN0b3J5IjpbLTY5ODU2ODk5LDE3MzkwNjY3OTddfQ==
 -->
