@@ -1,316 +1,422 @@
 
-# Examples README
+# 容器的使用方式
 
-  
+## 单例容器
+```php
+$container = Container::setInstance(new Container);
+```
 
-Table of contents:
+## 绑定
 
-*  [Hello World!](#hello-world)
+### 匿名函数绑定
+```php
+$container = new Container;
+$container->bind('name', function() {
+    return 'Taylor';
+});
+dump('Taylor' == $container->make('name'))
+```
 
-*  [Supported examples](#supported-examples)
+### 带参数绑定
+```php
+$container = new Container;
 
-*  [Featured](#featured)
+$container->bind('foo', function($container, $config) {
+    return $config;
+});
 
-*  [Snippets](#snippets)
 
-*  [GUI frameworks](#gui-frameworks)
+dump($container->make('foo', [1,2,3]));
+```
 
-*  [Build executable with PyInstaller](#build-executable-with-pyinstaller)
+### bindif 如果没有绑定过就绑定，绑定过了就不再绑定
+```php
+$container = new Container;
+$container->bind('name', function() {
+    return 'Taylor';
+});
 
-*  [Unit tests](#unit-tests)
+$container->bindIf('name', function () {
+    return 'Dayle';
+});
 
-*  [Other examples](#other-examples)
+dump('Taylor' == $container->make('name'))
+```
 
-*  [More examples to come](#more-examples-to-come)
+### 单例绑定
+```php
+$container = new Container;
+$class = stdClass::class;
+$container->singleton('class', function() use($class) {
+    return $class;
+});
 
-  
+$otherclass = stdClass::class;
+# 如果没有绑定class的话就绑定
+$container->singletonIf('class', function() use ($otherclass) {
+    return $otherclass;
+});
 
-## Hello World!
+dump($class == $container->make('class'));
+```
 
-  
+### bind和singleton的区别
+```php
+$container->singleton('class', function() {
+    return new stdClass;
+});
 
-Instructions to install the cefpython3 package, clone the repository
+dump($container->make('class') === $container->make('class')); # true
 
-and run the hello_world.py example:
+$container->bind('class', function() {
+    return new stdClass;
+});
 
-  
+dump($container->make('class') === $container->make('class')); # false
 
 ```
 
-pip install cefpython3==57.0
+### 抽象类绑定具体实现类
+```php
+$container = new Container;
 
-git clone https://github.com/cztomczak/cefpython.git
+# cache接口由redis实现
+$container->bind(CacheInterface::class, \EasyFramework\Cache\RedisCache::class);
 
-cd cefpython/examples/
+# TestClass2的构造函数依赖cache接口
+$container->make(\EasyFramework\Http\TestClass2::class);
+```
 
-python hello_world.py
+### 把容器传递到解析器
+```php
+$container = new Container;
+
+$container->bind('something', function($container) {
+    return $container;
+});
+
+dump($container->make('something'));
+```
+
+### ArrayAccess方式绑定
+```
+$container = new Container;
+
+$container['something'] = function ($container) {
+    return $container;
+};
+
+dump($container['something']);
+```
+
+### 别名 Aliases
+```php
+$container = new Container;
+
+$container['foo'] = 'bar';
+$container->alias('foo', 'baz'); # foo的别名是baz
+$container->alias('baz', 'bat'); # baz的别名是bat
+# foo = baz = bat
+dump('bar' == $container->make('foo'));
+dump('bar' == $container->make('baz'));
+dump('bar' == $container->make('bat'));
+```
+
+### 绑定可以被覆盖
+```php
+$container = new Container;
+
+$container['foo'] = 'bar';
+$container['foo'] = 'baz';
+dump('baz' == $container['foo']); # true
+dump('bar' == $container['foo']); # false
+```
+
+### 绑定实例然后返回实例
+```php
+$container = new Container;
+
+$bound = new stdClass();
+$resolved = $container->instance('foo', $bound);
+dump($bound === $resolved);
+dump($container->debug());
+```
+
+### 解析带有参数类
+```php
+class ContainerConcreteStub {}
+class ContainerDefaultValueStub
+{
+    public $stub;
+    public $default;
+    public function __construct(ContainerConcreteStub $stub, $default = 'taylor')
+    {
+        $this->stub = $stub;
+        $this->default = $default;
+    }
+}
+
+$container = new Container;
+
+$instance = $container->make(ContainerDefaultValueStub::class); # ContainerDefaultValueStub 构造函数依赖 ContainerConcreteStub参数
+dump(ContainerConcreteStub::class == get_class($instance->stub));
+```
+
+### 解除绑定
+```php
+$container = new Container;
+
+$container->instance('object', new stdClass());
+
+# unset 隐式调用 offsetUnset
+unset($container['object']); 
+
+dump($container->bound('object'));
+```
+
+
+### 通过ArrayAccess绑定实例和别名检查
+```php
+$container = new Container;
+
+$container->instance('object', new stdClass());
+$container->alias('object', 'alias');
+
+# isset 隐式调用 offsetExists
+dump(isset($container['object'])); 
+dump(isset($container['alias']));
+```
+
+### 重新绑定rebinding
+
+#### bing方式
+```php
+$container = new Container;
+
+unset($_SERVER['__test.rebind']);
+$container->bind('foo', function (){
+    $_SERVER['__test.rebind'] = false; 
+});
+dump($_SERVER['__test.rebind']); # null
+
+# 如果foo已经绑定过之后, 会重新绑定并且调用make方法， 并且执行上一次绑定的方法
+$container->rebinding('foo', function (){
+    $_SERVER['__test.rebind'] = true; 
+});
+dump($_SERVER['__test.rebind']); # false
+
+$container->bind('foo', function (){
+
+});
+dump($_SERVER['__test.rebind']); # true
+```
+
+instance方式
+```php
+$container = new Container;
+
+unset($_SERVER['__test.rebind']);
+$container->instance('foo', function (){
+    $_SERVER['__test.rebind'] = false;
+});
+
+# 实例化对象直接从instances数组返回,  不会继续执行make方法
+$container->rebinding('foo', function ($container){
+    $_SERVER['__test.rebind'] = true;
+});
+dump($_SERVER['__test.rebind']);
+
+$container->instance('foo', function (){
+    $_SERVER['__test.rebind'] = false;
+});
+dump($_SERVER['__test.rebind']);
+```
+
+### 删除指定实例化的对象
+```php
+$container = new Container;
+$containerConcreteStub = new ContainerConcreteStub;
+$container->instance(ContainerConcreteStub::class, $containerConcreteStub);
+$container->forgetInstance(ContainerConcreteStub::class); # 删除instances数组的指定对象
+```
+
+### 删除所有已经实例化的对象
+```php
+ $container = new Container;
+$containerConcreteStub1 = new ContainerConcreteStub;
+$containerConcreteStub2 = new ContainerConcreteStub;
+$containerConcreteStub3 = new ContainerConcreteStub;
+$container->instance('Instance1', $containerConcreteStub1);
+$container->instance('Instance2', $containerConcreteStub2);
+$container->instance('Instance3', $containerConcreteStub3);
+$container->forgetInstances();
+```
+
+### 容器刷新
+```php
+$container = new Container;
+
+$container->bind('ConcreteStub', function () {
+    return new ContainerConcreteStub;
+}, true);
+
+$container->alias('ConcreteStub', 'ContainerConcreteStub');
+$container->make('ConcreteStub');
+dump($container->resolved('ConcreteStub'));
+dump($container->isAlias('ContainerConcreteStub'));
+dump($container->getBindings());
+$container->flush(); # 刷新之后全部都没了
+dump($container->resolved('ConcreteStub'));
+dump($container->isAlias('ContainerConcreteStub'));
+dump($container->getBindings());
+```
+
+
+### 检查对象是否解析了
+```php
+$container = new Container;
+
+$container->bind('ConcreteStub', function () {
+    return new ContainerConcreteStub;
+}, true);
+
+$container->alias('ConcreteStub', 'foo');
+
+dump($container->resolved('ConcreteStub'));
+dump($container->resolved('foo'));
+$container->make('foo');
+dump($container->resolved('ConcreteStub'));
+dump($container->resolved('foo'));
+```
+
+### 查找别名
+```php
+$container = new Container;
+
+$container->alias('foo', 'foo1');
+$container->alias('foo1', 'foo2');
+$container->alias('foo2', 'foo3');
+
+dump($container->getAlias('foo3')); # 结果是foo, 可以递归查找最原始的抽象方法
+```
+
+### 延迟解析类
+```php
+$container = new Container;
+
+$container->bind('name', function () {
+    return 'Taylor';
+});
+
+$factory = $container->factory('name'); # 返回一个延迟的make匿名函数
+
+dump($factory() == $container->make('name'));
+```
+
+### 解析带参数的对象
+```php
+$container = new Container;
+
+$instance = $container->make(ContainerDefaultValueStub::class, ['default' => 'value']);
+
+dump($instance->default);
+
+$container->bind('foo', function($app, $config) {
+    return $config;
+});
+
+$instance = $container->make('foo', ['default' => 'value']);
+dump($instance);
+```
+
+### 解析一个抽象类
+```php
+$container = new Container;
+
+$container->bind(IContainerContractStub::class, ContainerInjectVariableStubWithInterfaceImplementation::class);
+$instance = $container->make(IContainerContractStub::class, ['something' => 'laurence']);
+dump($instance->something);
+```
+
+### 嵌套解析
+```php
+$container = new Container;
+
+$container->bind("foo", function($container, $config) {
+    return $container->make('bar', ['name' => 'dada']);
+});
+
+$container->bind('bar', function($container, $config) {
+    return $config;
+});
+
+dump($container->make('foo', ['something']));
+```
+
+### 单例绑定
+```php
+$container = new Container;
+
+$container->singleton('foo', function ($app, $config){
+    return $config;
+});
+
+dump($container->make('foo', [1,2,3]));
+```
+
+### 无参数的构建
+```php
+$container = new Container;
+
+dump($container->build(ContainerConcreteStub::class));
+```
+
+### 有参数的构
+```php
+$container = new Container;
+
+$container->bind(IContainerContractStub::class, ContainerImplementationStub::class);
+$container->build(ContainerDependentStub::class);
+```
+
+### 检索是否有绑定
+```php
+$container = new Container;
+
+$container->bind(IContainerContractStub::class, ContainerImplementationStub::class);
+dump($container->has(IContainerContractStub::class));
 
 ```
 
-  
-  
-
-## Supported examples
-
-  
-
-Examples provided in the examples/ root directory are actively
-
-maintained. If there are any issues in examples read top comments
-
-in sources to see whether this is a known issue with available
-
-workarounds.
-
-  
-  
-
-### Featured
-
-  
-
--  [hello_world.py](hello_world.py) - Basic example, doesn't require any
-
-third party GUI framework to run
-
--  [tutorial.py](tutorial.py) - Example from [Tutorial](../docs/Tutorial.md)
-
--  [screenshot.py](screenshot.py) - Example of off-screen rendering mode
-
-to create a screenshot of a web page. The code from this example is
-
-discussed in great details in Tutorial in the [Off-screen rendering](../docs/Tutorial.md#off-screen-rendering)
-
-section.
-
-  
-  
-
-### Snippets
-
-  
-
-See small code snippets that show various CEF features in the
-
-[examples/snippets/](snippets/) directory:
-
-  
-
--  [javascript_bindings.py](snippets/javascript_bindings.py) - Communicate
-
-between Python and Javascript asynchronously using
-
-inter-process messaging with the use of Javascript Bindings.
-
--  [javascript_errors.py](snippets/javascript_errors.py) - Two ways for
-
-intercepting Javascript errors.
-
--  [mouse_clicks.py](snippets/mouse_clicks.py) - Perform mouse clicks
-
-and mouse movements programmatically.
-
--  [network_cookies.py](snippets/network_cookies.py) - Implement
-
-interfaces to block or allow cookies over network requests.
-
--  [onbeforeclose.py](snippets/onbeforeclose.py) - Implement interface
-
-to execute custom code before browser window closes.
-
--  [ondomready.py](snippets/ondomready.py) - Execute custom Python code
-
-on a web page as soon as DOM is ready.
-
--  [onpagecomplete.py](snippets/onpagecomplete.py) - Execute custom
-
-Python code on a web page when page loading is complete.
-
-  
-  
-
-### GUI frameworks
-
-  
-
-Examples of embedding CEF browser using various GUI frameworks:
-
-  
-
--  [gtk2.py](gtk2.py): example for [PyGTK](http://www.pygtk.org/)
-
-library (GTK 2)
-
--  [gtk3.py](gtk3.py): example for [PyGObject / PyGI](https://wiki.gnome.org/Projects/PyGObject)
-
-library (GTK 3). Currently broken on Mac ([#310](../../../issues/310)).
-
--  [pysdl2.py](pysdl2.py): off-screen rendering example for
-
-[PySDL2](https://github.com/marcusva/py-sdl2) library. Example has some
-
-issues that are reported in Issue [#324](../../../issues/324).
-
--  [pywin32.py](pywin32.py): example for [pywin32](https://github.com/mhammond/pywin32)
-
-library
-
--  [qt.py](qt.py): example for [PyQt4](https://wiki.python.org/moin/PyQt4),
-
-[PyQt5](https://pypi.python.org/pypi/PyQt5)
-
-and [PySide](https://wiki.qt.io/PySide) libraries.
-
-PyQt4 and PySide examples are currently broken on Linux, see
-
-[Issue #452](../../../issues/452).
-
--  [tkinter_.py](tkinter_.py): example for [Tkinter](https://wiki.python.org/moin/TkInter).
-
-Currently broken on Mac ([#309](../../../issues/309)).
-
--  [wxpython.py](wxpython.py): example for [wxPython](https://wxpython.org/)
-
-toolkit. This example implements High DPI support on Windows.
-
-  
-  
-
-### Build executable with PyInstaller
-
-  
-
--  [PyInstaller example](pyinstaller/README-pyinstaller.md):
-
-example of packaging app using [PyInstaller](http://www.pyinstaller.org/)
-
-packager. Currently this example supports only Windows platform.
-
-  
-  
-
-### Unit tests
-
-  
-
-There are also available unit tests and its usage of the API can
-
-be of some use. See:
-
--  [main_test.py](../unittests/main_test.py) - windowed rendering general tests
-
--  [osr_test.py](../unittests/osr_test.py) - off-screen rendering tests
-
-  
-  
-
-## Other examples
-
-  
-
-There are even more examples available, they do not reside in the examples/
-
-directory. Some of them were created for old verions of CEF and were not
-
-yet ported to latest CEF. Some of them are externally maintained.
-
-  
-
-- Kivy framework:
-
-see [Kivy](https://github.com/cztomczak/cefpython/wiki/Kivy) wiki page.
-
-- Panda3D game engine:
-
-see [Panda3D](https://github.com/cztomczak/cefpython/wiki/Panda3D) wiki page.
-
-- PyGame/PyOpenGL:
-
-see [gist by AnishN](https://gist.github.com/AnishN/aa3bb27fc9d69319955ed9a8973cd40f)
-
-- Example of implementing [ResourceHandler](../api/ResourceHandler.md)
-
-with the use of [WebRequest](../api/WebRequest.md) object and
-
-[WebRequestClient](../api/WebRequestClient.md) interface to allow
-
-for reading/modifying web requests: see the [wxpython-response.py](https://github.com/cztomczak/cefpython/blob/cefpython31/cefpython/cef3/linux/binaries_64bit/wxpython-response.py)
-
-example in the cefpython31 branch.
-
-- Example of using Python network library (urllib3/openssl) instead of Chromium's
-
-network library - see [gist by Massimiliano Dal Cero](https://gist.github.com/yattamax/0252a3c5dc54a2f81650d5c0eafabf99)
-
-- Example of passing exceptions from Python to Javascript and using await syntax to receive values from python return values - see [Managed python calls example by Elliot Woods](https://github.com/elliotwoods/cefpython-tests/tree/0180b22eac10a1bde08820ca192fdc30eb93f00d/6.%20Managed%20python%20calls)
-
-  
-
-## More examples to come
-
-  
-
-Here is a list of issues in the tracker to create or upgrade examples:
-
-  
-
--  [Issue #323](../../../issues/323) - "Create cocos2d example"
-
--  [Issue #322](../../../issues/322) - "Create pyglet example"
-
--  [Issue #312](../../../issues/312) - "Easy to use CefBrowser widgets
-
-for many popular GUI toolkits"
-
--  [Issue #301](../../../issues/301) - "Fix cefpython3.wx package to work
-
-with latest v55+"
-
--  [Issue #289](../../../issues/289) - "Pygame / PyOpenGL example"
-
--  [Issue #288](../../../issues/288) - "Create panda3d_.py example"
-
--  [Issue #285](../../../issues/285) - "[kivy_.py] Refactor example, make
-
-it work cross-platform and move it
-
-to examples/"
-
--  [Issue #252](../../../issues/252) - "Use CEF views in Hello World, Tutorial
-
-and Offscreen examples, and in Unit
-
-tests"
-
--  [Issue #224](../../../issues/224) - "Port CEF 1 examples to CEF 3"
-
--  [Issue #109](../../../issues/109) - "The ResourceHandler example"
-
-  
-
-Packaging examples:
-
-  
-
--  [Issue #407](../../../issues/407) - "Example of packaging app using
-
-Cython compiler"
-
--  [Issue #396](../../../issues/396) - "Example of packaging app using
-
-Nuitka compiler"
-
--  [Issue #338](../../../issues/338) - "Example of packaging app using
-
-cx_Freeze"
-
--  [Issue #337](../../../issues/337) - "Example of packaging app using
-
-py2app"
-
--  [Issue #135](../../../issues/135) - "Example of packaging app using
-
-pyinstaller"
+### get解析对象
+```php
+$container = new Container;
+
+$container->bind('Taylor', stdClass::class);
+dump($container->get('Taylor'));
+```
+
+### 动态设置服务
+```php
+$container = new Container;
+
+$container['name'] = 'dada';
+dump($container['name']);
+```
+
+### 直接调用对象方法
+```php
+class  Test {
+    public function test2() {
+        echo 1234;
+    }
+}
+$inject = $container->make(Test::class);
+$container->call([$inject, 'test2']);
+# or
+$container->bind(Test::class);
+$container->call([Test::class, 'test2']);
+```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE4MDkxMTIzOTldfQ==
+eyJoaXN0b3J5IjpbLTQ4MjQxMjQ0Ml19
 -->
