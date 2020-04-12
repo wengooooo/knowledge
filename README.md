@@ -6,9 +6,9 @@
 
 ## Laravel
 - [容器使用方式](https://github.com/wengooooo/knowledge/blob/master/Laravel/Container_Userage.md)
-- 
+- [容器绑定的原理](https://github.com/wengooooo/knowledge/blob/master/Laravel/Container_Core.md)
 ## Chromium
 - [编译Chromium](https://github.com/wengooooo/knowledge/blob/master/Chromium/Build_Chromium.md)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTIyMDE5MzUzNiwxNzM5MDY2Nzk3XX0=
+eyJoaXN0b3J5IjpbMjAyNjA5MzM3LDE3MzkwNjY3OTddfQ==
 -->
