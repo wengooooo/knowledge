@@ -98,7 +98,7 @@ GYP_MSVS_OVERRIDE_PATH="C:\Program Files (x86)\Microsoft Visual Studio\2019\Ente
     
   或者
 
-    C:/chromium/src/>gn gen --ide=vs --filters=//chrome --no-deps out\Default
+    C:/chromium/src/>gn gen --ide=vs --filters=//chrome --no-deps out\Debug
 
 
 如果想生成更多的项目文件
@@ -148,5 +148,5 @@ C:/chromium/src/>ninja -C out\Debug chrome
 
 [中文版说明编译68版本](https://my.oschina.net/u/3175552/blog/3001316)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE0NDM3ODE5MzJdfQ==
+eyJoaXN0b3J5IjpbMTUyOTA5NjEwMiwtMTQ0Mzc4MTkzMl19
 -->
