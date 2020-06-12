@@ -23,7 +23,7 @@
  ```
  
 
-## 安装bind-chroot服务 
+## 安装DNS bind-chroot服务 
 安装完之后会有几个文件和文件夹
 
  - /etc/named.conf
@@ -271,5 +271,5 @@ tail -1f /var/log/maillog
 
 [Pigeonhole sieve例子](https://wiki2.dovecot.org/Pigeonhole/Sieve/Examples)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTQ4MDA2OTY4NF19
+eyJoaXN0b3J5IjpbNjM5NzMzMzQxLDE0ODAwNjk2ODRdfQ==
 -->
