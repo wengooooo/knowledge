@@ -6,7 +6,8 @@
 工作流程
  - Postfix 收到邮件传递给dovecot 
  - dovecot启动sieve进行过滤
- - sieve启用sieve extprograms传递给python
+ - sieve启用sieve extprograms传递给pshell
+ - shell调用Python
  - python做其他事情
 
 # 系统配置
@@ -67,10 +68,10 @@ zone "yixie4.org" IN {
                                         1H      ; retry
                                         1W      ; expire
                                         3H )    ; minimum
-        NS      ns.yixie4.org.
-ns      IN A    192.168.1.123 ; 公网ip或者服务器ip
+        NS      ns.yixie4.org8.net.
+ns      IN A    192.168.1.123.207.196.239 ; 公网ip或者服务器ip
         IN MX 10        mail.yixie4.org. ; mail域名
-mail    IN A    192.168.1.123 ; 公网ip或者服务器ip
+mail    IN A    192.168.1.123.207.196.239 ; 公网ip或者服务器ip
 
 # systemctl restart named
 # systemctl status named.service # 报错可以看这里日志
@@ -271,5 +272,6 @@ tail -1f /var/log/maillog
 
 [Pigeonhole sieve例子](https://wiki2.dovecot.org/Pigeonhole/Sieve/Examples)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbNjM5NzMzMzQxLDE0ODAwNjk2ODRdfQ==
+eyJoaXN0b3J5IjpbLTIwMTAwNTc2MzYsNjM5NzMzMzQxLDE0OD
+AwNjk2ODRdfQ==
 -->
