@@ -196,7 +196,7 @@ plugin {
 	sieve_trace_level = matching # 日志层级
 	sieve_plugins = sieve_extprograms # 外挂程序
 	sieve_pipe_bin_dir = /usr/lib/dovecot/sieve # sieve脚本存放的路径
-	sieve_global_extensions = +vnd.dovecot.pipe # +vnd.dovecot.environment # 要用到的扩展
+	sieve_global_extensions = +vnd.dovecot.pipe # +vnd.dovecot.environment +vnd.dovecot.execute# 要用到的扩展
 	sieve_before = /usr/lib/dovecot/sieve/report-spam.sieve # 调用之前执行sieve脚本
 }
 ```
@@ -208,6 +208,7 @@ require ["vnd.dovecot.pipe", "copy", "environment", "variables"];
 pipe :copy "sa-learn-spam.sh" [ "${username}" ];
 
 # chmod 755 /usr/lib/dovecot/sieve/report-spam.sieve
+# chmod +x /usr/lib/dovecot/sieve/report.sieve
 # chown mailreceiver.mailreceiver /usr/lib/dovecot/sieve/report-spam.sieve
 
 ```
@@ -216,6 +217,7 @@ shell脚本
 ```
 # vim /usr/lib/dovecot/sieve/sa-learn-spam.sh
 # chmod 755 /usr/lib/dovecot/sieve/sa-learn-spam.sh
+# chmod +x /usr/lib/dovecot/sieve/sa-learn-spam.sh
 # chown mailreceiver.mailreceiver /usr/lib/dovecot/sieve/sa-learn-spam.sh
 ```
 重启
@@ -239,6 +241,10 @@ python脚本
 [Extprograms Plugins 配置](https://wiki2.dovecot.org/Pigeonhole/Sieve/Plugins/Extprograms)
 
 [Sieve 参考例子](https://wiki2.dovecot.org/HowTo/AntispamWithSieve)
+
+[Sieve 语法](http://sieve.info/)
+
+[Pigeonhole sieve例子](https://wiki2.dovecot.org/Pigeonhole/Sieve/Examples)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTMwMjA2NDA2Nl19
+eyJoaXN0b3J5IjpbLTEyMzk4NzcwNzMsMTMwMjA2NDA2Nl19
 -->
