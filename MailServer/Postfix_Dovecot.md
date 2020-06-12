@@ -1,6 +1,7 @@
 
 
 
+
 # Postfix Dovecot Sieve
 工作流程
  - Postfix 收到邮件传递给dovecot 
@@ -204,22 +205,42 @@ plugin {
 sieve脚本
 ```
 # vim /usr/lib/dovecot/sieve/report-spam.sieve
-require ["vnd.dovecot.pipe", "copy", "environment", "variables"];
-pipe :copy "sa-learn-spam.sh" [ "${username}" ];
+require ["foreverypart", "vnd.dovecot.execute", "copy", "environment", "variables", "body", "mime", "extracttext", "encoded-character"];
+if header :matches "Subject" "*"
+{
+     set "subject" "${1}";
+}
+
+foreverypart
+{
+     if header :mime :type :is "Content-Type" "text"
+     {
+      extracttext :first 100 "msgcontent";
+      break;
+     }
+}
+
+execute :pipe "report-execute.py" ["${subject}"];
 
 # chmod 755 /usr/lib/dovecot/sieve/report-spam.sieve
 # chmod +x /usr/lib/dovecot/sieve/report.sieve
 # chown mailreceiver.mailreceiver /usr/lib/dovecot/sieve/report-spam.sieve
 
 ```
+python脚本
+安装mail-parse
+```
+yum install python-pip
+pip install mail-parser
+```
+```
+# vim /usr/lib/dovecot/sieve-execute/report-execute.py
+#!/usr/bin/python
+import os, sys, mailparser, codecs, re
+content = sys.stdin.read()
+mail = mailparser.parse_from_string(content)
+```
 
-shell脚本
-```
-# vim /usr/lib/dovecot/sieve/sa-learn-spam.sh
-# chmod 755 /usr/lib/dovecot/sieve/sa-learn-spam.sh
-# chmod +x /usr/lib/dovecot/sieve/sa-learn-spam.sh
-# chown mailreceiver.mailreceiver /usr/lib/dovecot/sieve/sa-learn-spam.sh
-```
 重启
 ```
 chmod -R +x /home/mailreceiver/
@@ -227,8 +248,11 @@ chmod -R +x /var/mail/mailreceiver
 service dovecot restart
 tail -1f /var/log/maillog #查看日志
 ```
-python脚本
+
+错误
+通过查看日志，多数都是权限问题，修改文件夹权限为755，文件权限为644
 ```
+tail -1f /var/log/maillog
 ```
 
 参阅文档
@@ -240,11 +264,13 @@ python脚本
 
 [Extprograms Plugins 配置](https://wiki2.dovecot.org/Pigeonhole/Sieve/Plugins/Extprograms)
 
+[可用的插件](https://wiki2.dovecot.org/Pigeonhole/Sieve)
+
 [Sieve 参考例子](https://wiki2.dovecot.org/HowTo/AntispamWithSieve)
 
 [Sieve 语法](http://sieve.info/)
 
 [Pigeonhole sieve例子](https://wiki2.dovecot.org/Pigeonhole/Sieve/Examples)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEyMzk4NzcwNzMsMTMwMjA2NDA2Nl19
+eyJoaXN0b3J5IjpbMTc4ODM2Nzc0N119
 -->
