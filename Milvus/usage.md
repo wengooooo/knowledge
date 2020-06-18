@@ -6,6 +6,7 @@
  - tensorflow             1.14.0
 
 ```bash
+yum install gcc
 yum install openssl-devel -y
 yum install zlib-devel -y
 mkdir /usr/local/python3
@@ -13,6 +14,11 @@ tar -xvf  Python-3.5.6.tgz
 cd Python-3.5.6
 ./configure --prefix=/usr/local/python3
 make && make install
+
+ln -s /usr/local/python3/bin/python3.5 /usr/bin/python3
+ln -s /usr/local/python3/bin/pip3 /usr/bin/pip3
+
+pip3 install --upgrade pip
 ```
 安装
 ```bash
@@ -27,5 +33,5 @@ python 代码
 
 ```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTUxMzE2MzUyMl19
+eyJoaXN0b3J5IjpbMTg4NDYyNDAwNl19
 -->
