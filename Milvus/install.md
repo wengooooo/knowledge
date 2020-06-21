@@ -67,8 +67,8 @@ docker ps
  - GCC 7.0 or higher to support C++ 17
  - Git
  - CMake 3.12 or higher
+ - Milvus 0.10
 
-[https://www.cnblogs.com/jixiaohua/p/11732225.html](https://www.cnblogs.com/jixiaohua/p/11732225.html)
 ```bash
 yum -y install git
 yum -y install bzip2
@@ -85,7 +85,66 @@ cp /usr/local/src/milvus-master/core/cmake_build/src /var/lib/milvus/bin
 cp -R /usr/local/src/milvus-master/core/milvus/conf  /var/lib/milvus/
 cp -R /usr/local/src/milvus-master/core/milvus/lib /var/lib/milvus/
 cp -R /usr/local/src/milvus-master/core/milvus/scripts /var/lib/milvus/
+```
 
+建立服务启动
+```bash
+vim /etc/init.d/milvus
+#!/bin/bash
+#Startup script for the milvus Web Server
+#chkconfig: 2345 85 15
+milvus=/var/lib/milvus/bin/milvus_server
+conf=/var/lib/milvus/conf/server_config.yaml
+case $1 in
+start)
+echo -n "Starting milvus"
+$milvus -c $conf &
+echo " done."
+;;
+stop)
+echo -n "Stopping milvus"
+function kill_progress()
+{
+  kill -s SIGUSR2 $(pgrep $1)
+
+  sleep 2
+}
+
+STATUS=$(kill_progress "milvus_server" )
+
+if [[ ${STATUS} == "false" ]];then
+  echo "Milvus server closed abnormally!"
+else
+  echo "Milvus server closed successfully!"
+fi
+;;
+*)
+echo "Usage: $0 {start|stop}"
+;;
+esac
+
+chmod 755 /etc/initd./milvus
+```
+
+修改数据管理为mysql
+```bash
+vim /var/lib/milvus/server_config.yaml
+# 搜索meta_uri
+# 把sqlite替换为
+# mysql://root:123456@<MySQL_server_host IP>:3306/milvus
+```
+
+启动
+```bash
+service milvus start
+service milvus stop
+```py
+
+查看监听Ip
+```bash
+# 19530默认端口
+lsof -nP -iTCP -sTCP:LISTEN
+```
 
 这个可以看情况安装
 # cmake安装
@@ -97,6 +156,11 @@ ln -sf /opt/cmake-3.12.2/bin/* /usr/bin/
 
 ```
 
+
+参考啊
+
+[https://www.cnblogs.com/jixiaohua/p/11732225.html](https://www.cnblogs.com/jixiaohua/p/11732225.html)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTExMjY3NTQ0MzVdfQ==
+eyJoaXN0b3J5IjpbLTE3NzE4MTc4OTgsLTExMjY3NTQ0MzVdfQ
+==
 -->
