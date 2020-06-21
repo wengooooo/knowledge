@@ -15,9 +15,9 @@
 # wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/containerd.io-1.2.6-3.3.el7.x86_64.rpm
 # wget https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-19.03.9-3.el7.x86_64.rpm
 
-# yum install containerd.io-1.2.6-3.3.el7.x86_64.rpm
-# yum install docker-ce-cli-19.03.9-3.el7.x86_64.rpm
-# yum install docker-ce-19.03.9-3.el7.x86_64.rpm
+# yum -y install containerd.io-1.2.6-3.3.el7.x86_64.rpm
+# yum -y install docker-ce-cli-19.03.9-3.el7.x86_64.rpm
+# yum -y install docker-ce-19.03.9-3.el7.x86_64.rpm
 
 ```
 
@@ -29,5 +29,5 @@
 ```
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTE4MDk4NDAzNzBdfQ==
+eyJoaXN0b3J5IjpbLTEwODUzMjQ4Nl19
 -->
