@@ -17,7 +17,7 @@
 ### 创建数据集
 
 ```
-#在keras-yolo3下创建make_train.py
+#在keras-yolo3下创建
 VOCdevkit
 └── VOC2007
     ├── Annotations
@@ -28,7 +28,12 @@ VOCdevkit
     ├── JPEGImages
     └── labels
 ```
-在 VOC2007创建文件
+在 VOC2007创建文件make_train.py
+会Main文件夹生成
+test.txt
+train.txt
+trainval.txt
+val.txt
 ```
 import os
 import random
@@ -71,6 +76,8 @@ ftrain.close()
 fval.close()
 ftest.close()
 ```
+### 修改自己需要训练的类别
+在YoloV3根目录下找到yolov3
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMzIwMTY1NzNdfQ==
+eyJoaXN0b3J5IjpbLTQyMzY3MjYyNF19
 -->
