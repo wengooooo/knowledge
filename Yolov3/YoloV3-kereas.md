@@ -77,7 +77,11 @@ fval.close()
 ftest.close()
 ```
 ### 修改自己需要训练的类别
-在YoloV3根目录下找到yolov3
+在YoloV3根目录下找到voc_annotation.py 进行修改
+```
+
+classes = ["tops", "dress", "bottoms", "bag", "shoes", "accessories", "snack", "makeup", "bottle", "furniture", "toy", "underwear", "digitaldevice", "other"]
+```
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTQyMzY3MjYyNF19
+eyJoaXN0b3J5IjpbLTEwMjkyODUwMjNdfQ==
 -->
