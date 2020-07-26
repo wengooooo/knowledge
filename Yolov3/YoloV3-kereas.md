@@ -79,9 +79,17 @@ ftest.close()
 ### 修改自己需要训练的类别
 在YoloV3根目录下找到voc_annotation.py 进行修改
 ```
-
+# vi voc_annotation.py
 classes = ["tops", "dress", "bottoms", "bag", "shoes", "accessories", "snack", "makeup", "bottle", "furniture", "toy", "underwear", "digitaldevice", "other"]
 ```
+
+### 下载yolo预训练模型
+```
+wget https://pjreddie.com/media/files/yolov3.weights
+python convert.py yolov3.cfg yolov3.weights model_data/yolo.h5
+```
+
+
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTEwMjkyODUwMjNdfQ==
+eyJoaXN0b3J5IjpbMzQxMjg2MDExXX0=
 -->
