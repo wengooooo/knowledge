@@ -225,6 +225,5 @@ tail -1f /var/log/maillog
 
 [Pigeonhole sieve例子](https://wiki2.dovecot.org/Pigeonhole/Sieve/Examples)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbOTcyMjYyMDIsLTIwMTAwNTc2MzYsNjM5Nz
-MzMzQxLDE0ODAwNjk2ODRdfQ==
+eyJoaXN0b3J5IjpbOTcyMjYyMDJdfQ==
 -->
