@@ -24,58 +24,6 @@
  ```
  
 
-## 安装DNS bind-chroot服务 
-安装完之后会有几个文件和文件夹
-
- - /etc/named.conf
- - /etc/named.rfc1912.zones
- - /var/named/
-
-```
-# yum install bind-chroot -y 
-```
-
-配置named.conf
-```
-# vim /etc/named.conf
-# :set nu 显示行号
-# 修改13行
-listen-on port 53 { 127.0.0.1; }; => listen-on port 53 { any; };
-# 修改21行
-allow-query     { 127.0.0.1; }; => allow-query     { any; };
-```
-配置named.rfc1912.zones
-
-```
-# vim named.rfc1912.zones
-# 文件后面追加, 域名根据自己的来填写，假设这里是
-zone "yixie4.org" IN {
-        type master;
-        file "yixie4.org.zone"; # 后面新增这个文件
-        allow-update { none; };
-};
-```
-
-配置解析数据信息
-
-```
-# cp -a /var/named/named.localhost #这是在name.rfc1912.zones定义好的/var/named/yixie4.org.zone
-# vim /var/named/yixie4.org.zone # .代表结束
-# $TTL 1D
-@       IN SOA  yixie4.org. root.yixie4.org. (
-                                        0       ; serial
-                                        1D      ; refresh
-                                        1H      ; retry
-                                        1W      ; expire
-                                        3H )    ; minimum
-        NS      ns.yixie4.org8.net.
-ns      IN A    192.168.1.123.207.196.239 ; 公网ip或者服务器ip
-        IN MX 10        mail.yixie4.org. ; mail域名
-mail    IN A    192.168.1.123.207.196.239 ; 公网ip或者服务器ip
-
-# systemctl restart named
-# systemctl status named.service # 报错可以看这里日志
-```
 ## 安装postfix
 ```
 # yum install postfix
@@ -193,18 +141,21 @@ protocol lmtp {
 # 文件最后追加
 # vim /etc/dovecot/dovecot.conf
 plugin {
-	sieve_trace_dir = /var/log/sievelog # 日志跟踪
-	sieve_trace_level = matching # 日志层级
-	sieve_plugins = sieve_extprograms # 外挂程序
-	sieve_pipe_bin_dir = /usr/lib/dovecot/sieve # sieve脚本存放的路径
-	sieve_global_extensions = +vnd.dovecot.pipe # +vnd.dovecot.environment +vnd.dovecot.execute# 要用到的扩展
-	sieve_before = /usr/lib/dovecot/sieve/report-spam.sieve # 调用之前执行sieve脚本
+        sieve_trace_dir = /var/log/sievelog # 日志跟踪
+        sieve_trace_level = matching #日志层级
+        sieve_trace_debug = yes
+        sieve_plugins = sieve_extprograms # 外挂程序
+        sieve_pipe_bin_dir = /usr/lib/dovecot/sieve # sieve脚本存放的路径
+        sieve_execute_bin_dir = /usr/lib/dovecot/sieve-execute
+        sieve_global_extensions = +vnd.dovecot.pipe +vnd.dovecot.environment +vnd.dovecot.execute # 要用到的扩展
+        sieve_before = /usr/lib/dovecot/sieve-execute/sieve-execute.sieve
 }
+
 ```
 创建sieve的脚本和shell的脚本
 sieve脚本
 ```
-# vim /usr/lib/dovecot/sieve/report-spam.sieve
+# vim /usr/lib/dovecot/sieve-execute/sieve-execute.sieve
 require ["foreverypart", "vnd.dovecot.execute", "copy", "environment", "variables", "body", "mime", "extracttext", "encoded-character"];
 if header :matches "Subject" "*"
 {
@@ -222,9 +173,9 @@ foreverypart
 
 execute :pipe "report-execute.py" ["${subject}"];
 
-# chmod 755 /usr/lib/dovecot/sieve/report-spam.sieve
-# chmod +x /usr/lib/dovecot/sieve/report.sieve
-# chown mailreceiver.mailreceiver /usr/lib/dovecot/sieve/report-spam.sieve
+# chmod 755 /usr/lib/dovecot/sieve-execute/sieve-execute.sieve
+# chmod +x /usr/lib/dovecot/sieve-execute/sieve-execute.sieve
+# chown mailreceiver.mailreceiver /usr/lib/dovecot/sieve-execute/sieve-execute.sieve
 
 ```
 python脚本
@@ -239,6 +190,8 @@ pip install mail-parser
 import os, sys, mailparser, codecs, re
 content = sys.stdin.read()
 mail = mailparser.parse_from_string(content)
+with open("/tmp/email.txt", "w+") as file:
+        file.write(content)
 ```
 
 重启
@@ -272,6 +225,6 @@ tail -1f /var/log/maillog
 
 [Pigeonhole sieve例子](https://wiki2.dovecot.org/Pigeonhole/Sieve/Examples)
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbLTIwMTAwNTc2MzYsNjM5NzMzMzQxLDE0OD
-AwNjk2ODRdfQ==
+eyJoaXN0b3J5IjpbOTcyMjYyMDIsLTIwMTAwNTc2MzYsNjM5Nz
+MzMzQxLDE0ODAwNjk2ODRdfQ==
 -->
