@@ -19,10 +19,12 @@ VOCdevkit
 ```
 在 VOC2007创建文件make_train.py
 会Main文件夹生成
+```
 test.txt
 train.txt
 trainval.txt
 val.txt
+```
 ```
 import os
 import random
@@ -133,7 +135,7 @@ python voc_to_yolo.py
 ```
 # vim cfg/voc.data
 
-```
+```shell
 classes= 3
 train  = %path%/data/voc/train.txt
 valid  = %path%/pjreddie/data/voc/2007_test.txt
@@ -165,5 +167,5 @@ classes = 3 # 类别
 ```
 
 <!--stackedit_data:
-eyJoaXN0b3J5IjpbMTUxNDA4NjEyN119
+eyJoaXN0b3J5IjpbMTU4NDM3NTY1N119
 -->
